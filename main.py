@@ -67,10 +67,10 @@ def main():
     if top:
         notify.send(format_message(top))
         print("Digest sent.")
+        storage.save_seen(seen)
     else:
+        storage.save_seen(seen)
         print("No jobs above threshold; nothing sent.")
-
-    storage.save_seen(seen)
 
 
 if __name__ == "__main__":
