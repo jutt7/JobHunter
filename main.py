@@ -1,5 +1,5 @@
 """Daily job agent: fetch new German job postings, score them against your CV
-with Claude, and send the best ones to Telegram."""
+with OpenAI, and send the best ones to Telegram."""
 import notify
 import scoring
 import storage

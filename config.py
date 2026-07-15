@@ -20,5 +20,5 @@ SEARCH_PROFILES = [
 
 DAYS_BACK = 1            # only postings published in the last N days
 MIN_SCORE = 6           # only send jobs the model scores >= this (0-10)
-MAX_JOBS_TO_SCORE = 40  # cost guard: max Claude calls per run
+MAX_JOBS_TO_SCORE = 40  # cost guard: max OpenAI calls per run
 TOP_N = 15              # max jobs included in the morning message

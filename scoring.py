@@ -1,14 +1,15 @@
-"""Uses the Claude API to score how well each job fits your CV (0-10) plus a
-one-line reason. Defaults to Haiku (cheap + fast) since this is triage; bump
-CLAUDE_MODEL to a Sonnet model if you want sharper judgement."""
+"""Uses the OpenAI API to score how well each job fits your CV (0-10) plus a
+one-line reason. Defaults to gpt-4o-mini (cheap + fast) since this is triage;
+bump OPENAI_MODEL to gpt-4o if you want sharper judgement."""
 import json
 import os
 
-from anthropic import Anthropic
+from openai import OpenAI
+
 from arbeitsagentur import location_str
 
-client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-MODEL = os.environ.get("CLAUDE_MODEL", "claude-haiku-4-5-20251001")
+client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 
 PROMPT = """You are screening job postings for a candidate. Rate how well this \
 job fits from 0 (no fit) to 10 (excellent fit). Weigh role & seniority, tech \
@@ -39,15 +40,13 @@ def score_job(cv, job):
         location=location_str(job),
     )
     try:
-        msg = client.messages.create(
+        resp = client.chat.completions.create(
             model=MODEL,
             max_tokens=150,
+            response_format={"type": "json_object"},
             messages=[{"role": "user", "content": prompt}],
         )
-        text = "".join(b.text for b in msg.content if b.type == "text").strip()
-        # strip accidental code fences
-        text = text.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-        data = json.loads(text)
+        data = json.loads(resp.choices[0].message.content)
         return int(data.get("score", 0)), str(data.get("reason", "")).strip()
     except Exception as e:
         return 0, f"scoring error: {e}"

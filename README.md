@@ -1,7 +1,7 @@
 # Daily Job Agent 🇩🇪
 
 Every morning: pulls fresh German job postings from the **Arbeitsagentur** (Federal
-Employment Agency) public API, has **Claude** score each one against your CV (0–10
+Employment Agency) public API, has **OpenAI** score each one against your CV (0–10
 with a one-line reason), and sends the best hits to your **Telegram** — sorted by
 fit, deduplicated, with apply links.
 
@@ -15,12 +15,12 @@ Runs entirely on the **GitHub Actions free tier** — no server to keep alive.
 GitHub Actions cron  ──>  main.py
                            ├─ arbeitsagentur.py  fetch new jobs (free API)
                            ├─ storage.py         drop ones already seen
-                           ├─ scoring.py         Claude rates fit 0–10
+                           ├─ scoring.py         OpenAI rates fit 0–10
                            └─ notify.py          Telegram digest
 ```
 
-The only paid piece is the Claude scoring — a handful of Haiku calls per day,
-cents-level. Turn the cost knob with `MAX_JOBS_TO_SCORE` in `config.py`, or delete
+The only paid piece is the OpenAI scoring — a handful of gpt-4o-mini calls per
+day, cents-level. Turn the cost knob with `MAX_JOBS_TO_SCORE` in `config.py`, or delete
 the scoring step for a raw list.
 
 ---
@@ -35,15 +35,15 @@ the scoring step for a raw list.
    *(Or open `https://api.telegram.org/bot<TOKEN>/getUpdates` in a browser after
    messaging the bot, and read `chat.id` from the JSON.)*
 
-### 2. Get an Anthropic API key
-From the [Claude Console](https://console.anthropic.com/) → API Keys.
+### 2. Get an OpenAI API key
+From the [OpenAI Platform](https://platform.openai.com/api-keys) → API keys.
 
 ### 3. Push this repo to GitHub, then add secrets
 Repo → **Settings → Secrets and variables → Actions → New repository secret**:
 
 | Secret name          | Value                     |
 |----------------------|---------------------------|
-| `ANTHROPIC_API_KEY`  | your Claude API key       |
+| `OPENAI_API_KEY`     | your OpenAI API key       |
 | `TELEGRAM_BOT_TOKEN` | the BotFather token       |
 | `TELEGRAM_CHAT_ID`   | your numeric chat ID      |
 
@@ -63,7 +63,7 @@ every morning.
 
 ```bash
 pip install -r requirements.txt
-export ANTHROPIC_API_KEY=...   TELEGRAM_BOT_TOKEN=...   TELEGRAM_CHAT_ID=...
+export OPENAI_API_KEY=...   TELEGRAM_BOT_TOKEN=...   TELEGRAM_CHAT_ID=...
 python main.py
 ```
 
@@ -75,6 +75,6 @@ python main.py
 - **Missing employer sites** (CHECK24, Bending Spoons, internal SAP transfers):
   those often post only on their own career pages and won't all appear in the
   Arbeitsagentur DB — keep those manual, or add per-site checks later.
-- **Sharper scoring:** uncomment `CLAUDE_MODEL: claude-sonnet-5` in the workflow.
+- **Sharper scoring:** uncomment `OPENAI_MODEL: gpt-4o` in the workflow.
 - **SSL errors** from the API on some networks: set env `VERIFY_SSL=false`.
 - **Timezone:** the cron is UTC. `0 5 * * *` lands around 6–7am German time.
