@@ -1,0 +1,23 @@
+### REPLACE THIS with your full CV text (or a tight summary). The more concrete
+### the tech stack and constraints, the sharper the fit scores. Seed below:
+
+Frontend-leaning full-stack engineer. Working student at SAP (Multi Experience
+Platform team, Germany) building the Augmented CMS: a Next.js 15 enterprise app
+with Module Federation / micro-frontends. Strong in React, TypeScript, Next.js.
+
+Education: M.Sc. Computer Science, RPTU Kaiserslautern-Landau (final exam Aug
+2026). Full-time available from September 2026. Open to relocating anywhere in
+Germany or Europe.
+
+Notable project: PR Review Agent — a GitHub App built with Spring Boot, the
+Anthropic Claude API, PostgreSQL, Docker, and AWS.
+
+Other experience: GraphQL and SAP UI5 exposure; daily use of GitHub Copilot and
+Claude. Java/Spring Boot is project-based rather than professional. No
+professional micro-frontend/Module Federation experience beyond current SAP work.
+
+Languages: English (fluent). German A1-A2 — roles requiring fluent German are a
+weak fit; English-friendly or international teams are a strong fit.
+
+Target roles: Frontend / React / TypeScript engineer, Full-stack engineer,
+Software engineer at product-focused companies.

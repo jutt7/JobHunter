@@ -1,0 +1,40 @@
+name: Daily Job Agent
+
+on:
+  schedule:
+    # Runs at 05:00 UTC daily ≈ 06:00 (winter) / 07:00 (summer) German time.
+    # Cron in GitHub Actions is always UTC. Adjust the hour if you like.
+    - cron: "0 5 * * *"
+  workflow_dispatch: {}   # lets you trigger a run manually from the Actions tab
+
+permissions:
+  contents: write         # needed to commit seen.json back to the repo
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # CLAUDE_MODEL: claude-sonnet-5   # optional: sharper scoring, pricier
+        run: python main.py
+
+      - name: Persist seen jobs
+        run: |
+          git config user.name "job-agent"
+          git config user.email "actions@users.noreply.github.com"
+          git add seen.json
+          git diff --staged --quiet || git commit -m "update seen jobs [skip ci]"
+          git push
