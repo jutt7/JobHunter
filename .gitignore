@@ -1,0 +1,10 @@
+# Your personal CV is injected via the CV_TEXT secret at runtime. If you instead
+# edit cv.txt directly and don't want it committed, uncomment the next line:
+# cv.txt
+
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env

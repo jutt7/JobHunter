@@ -6,16 +6,13 @@ de-duplicated across all profiles before scoring.
 """
 
 SEARCH_PROFILES = [
-    # City-based searches (umkreis = radius in km)
-    {"was": "Frontend Developer React", "wo": "Berlin", "umkreis": 30},
-    {"was": "Frontend Developer React", "wo": "München", "umkreis": 30},
-    {"was": "Fullstack Developer TypeScript", "wo": "Frankfurt", "umkreis": 40},
-
-    # Remote / home-office (no city, arbeitszeit "ho" = Homeoffice)
-    {"was": "React TypeScript Entwickler", "arbeitszeit": "ho"},
-
-    # Anything near you now
-    {"was": "Software Engineer", "wo": "Kaiserslautern", "umkreis": 60},
+    # No "wo" (city) => searches all of Germany. Just keyword variants that
+    # match your stack, in both English and German (postings use both).
+    {"was": "Frontend Developer React"},
+    {"was": "React TypeScript Entwickler"},
+    {"was": "Frontend Engineer"},
+    {"was": "Fullstack Developer TypeScript"},
+    {"was": "Software Engineer React"},
 ]
 
 DAYS_BACK = 1            # only postings published in the last N days

@@ -1,5 +1,11 @@
 """Daily job agent: fetch new German job postings, score them against your CV
 with OpenAI, and send the best ones to Telegram."""
+try:  # load a local .env for running on your machine (no-op in GitHub Actions)
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 import notify
 import scoring
 import storage
@@ -67,10 +73,10 @@ def main():
     if top:
         notify.send(format_message(top))
         print("Digest sent.")
+        storage.save_seen(seen)
     else:
+        storage.save_seen(seen)
         print("No jobs above threshold; nothing sent.")
-
-    storage.save_seen(seen)
 
 
 if __name__ == "__main__":

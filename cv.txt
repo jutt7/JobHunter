@@ -1,23 +1,36 @@
-### REPLACE THIS with your full CV text (or a tight summary). The more concrete
-### the tech stack and constraints, the sharper the fit scores. Seed below:
+# TEMPLATE — replace with your own profile.
+# Two ways to provide your CV:
+#   1. Edit this file directly (your CV will live in the repo), OR
+#   2. (recommended for a public repo) leave this template as-is and add a
+#      CV_TEXT repository secret with your full CV — the workflow injects it at
+#      runtime so your CV never gets committed.
+# The more concrete the tech stack, seniority, location and language notes,
+# the sharper the fit scores.
 
-Frontend-leaning full-stack engineer. Working student at SAP (Multi Experience
-Platform team, Germany) building the Augmented CMS: a Next.js 15 enterprise app
-with Module Federation / micro-frontends. Strong in React, TypeScript, Next.js.
+Full-Stack Software Engineer (frontend-leaning). React & TypeScript, plus
+Java / Spring Boot on the backend. Open to relocating anywhere in Germany.
+Availability: full-time.
 
-Education: M.Sc. Computer Science, RPTU Kaiserslautern-Landau (final exam Aug
-2026). Full-time available from September 2026. Open to relocating anywhere in
-Germany or Europe.
+EXPERIENCE
+- Company (Country) — Role, dates
+  Key stack and what you built.
 
-Notable project: PR Review Agent — a GitHub App built with Spring Boot, the
-Anthropic Claude API, PostgreSQL, Docker, and AWS.
+PROJECTS
+- Project name: one-line description and stack.
 
-Other experience: GraphQL and SAP UI5 exposure; daily use of GitHub Copilot and
-Claude. Java/Spring Boot is project-based rather than professional. No
-professional micro-frontend/Module Federation experience beyond current SAP work.
+SKILLS
+Languages: TypeScript, JavaScript, Java, SQL
+Frontend: React, Next.js, ...
+Backend: Spring Boot, REST APIs, ...
+DevOps: Docker, CI/CD, AWS, ...
 
-Languages: English (fluent). German A1-A2 — roles requiring fluent German are a
-weak fit; English-friendly or international teams are a strong fit.
+EDUCATION
+- Degree, University, dates
 
-Target roles: Frontend / React / TypeScript engineer, Full-stack engineer,
-Software engineer at product-focused companies.
+LANGUAGES
+English (professional) · German (beginner — roles requiring fluent German are a
+weak fit) · other languages
+
+TARGET ROLES
+Frontend / React / TypeScript engineer, Full-stack engineer, or Software engineer.
+English-friendly / international teams are a strong fit.
