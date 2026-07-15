@@ -1,23 +1,61 @@
-### REPLACE THIS with your full CV text (or a tight summary). The more concrete
-### the tech stack and constraints, the sharper the fit scores. Seed below:
+Muhammad Awais Gondal — Full-Stack Software Engineer (frontend-leaning)
+React & TypeScript · Java & Spring Boot
+Location: Kaiserslautern, Germany · open to relocating to ANY city in Germany.
+Availability: full-time from September 2026 (currently a working student).
 
-Frontend-leaning full-stack engineer. Working student at SAP (Multi Experience
-Platform team, Germany) building the Augmented CMS: a Next.js 15 enterprise app
-with Module Federation / micro-frontends. Strong in React, TypeScript, Next.js.
+SUMMARY
+Software engineer with enterprise frontend experience at SAP building
+React/TypeScript applications, now expanding into backend and full-stack work
+with Java and Spring Boot. Hands-on with AI-assisted development in a production
+enterprise setting. Comfortable across REST APIs, relational databases, Docker,
+and agile cross-functional teams; focus on clean code, testing, maintainability.
 
-Education: M.Sc. Computer Science, RPTU Kaiserslautern-Landau (final exam Aug
-2026). Full-time available from September 2026. Open to relocating anywhere in
-Germany or Europe.
+EXPERIENCE
+SAP (Germany) — React & TypeScript Developer, Working Student (Jun 2023–present)
+- Core UI modules for the Multi Experience Platform Augmented CMS: Next.js 15,
+  Module Federation, React Router v6.
+- State/data with Zustand, TanStack Query v5, React Hook Form + Yup.
+- Accessible UIs with UI5 Web Components v2, SAP Fiori Design System, React Flow,
+  and @dnd-kit drag-and-drop.
+- Testing with Cypress and Playwright (80–90% coverage); CI/CD via GitHub Actions
+  + SAP Piper, SonarQube quality gates.
+- Production AI-assisted development with the Anthropic Claude API.
 
-Notable project: PR Review Agent — a GitHub App built with Spring Boot, the
-Anthropic Claude API, PostgreSQL, Docker, and AWS.
+Innovo Technologies (Pakistan) — Junior React Native Developer (Oct 2021–Mar 2023)
+- Vehicle Wallet fleet platform; real-time features with Socket.io; Google Maps
+  API; test coverage with Jest.
 
-Other experience: GraphQL and SAP UI5 exposure; daily use of GitHub Copilot and
-Claude. Java/Spring Boot is project-based rather than professional. No
-professional micro-frontend/Module Federation experience beyond current SAP work.
+PookiDevs (Pakistan) — React Native Intern (Aug 2020–Jan 2021)
+- E-commerce app (React Native, Firebase) with in-app purchases.
 
-Languages: English (fluent). German A1-A2 — roles requiring fluent German are a
-weak fit; English-friendly or international teams are a strong fit.
+PROJECTS
+- PR Review Agent (in progress): Spring Boot, Java, Anthropic Claude API, GitHub
+  API, PostgreSQL, Docker, AWS. Event-driven GitHub App that reviews PRs; @Async
+  background processing, HMAC verification, retries/backoff, Flyway, idempotency.
+- Microservices Order Management: Java, Spring Boot, REST, Eureka, Feign, Docker.
+- Covid-19 Detection App: React Native frontend + CNN backend, 96% accuracy.
 
-Target roles: Frontend / React / TypeScript engineer, Full-stack engineer,
-Software engineer at product-focused companies.
+SKILLS
+Languages: TypeScript, JavaScript, Java (8+), SQL, HTML5, CSS3
+Frontend: React, Next.js, React Native, Zustand, Redux, TanStack Query, React
+  Hook Form, UI5 Web Components, SAP Fiori, Material UI, React Flow
+Backend: Java, Spring Boot, Spring Data JPA, REST APIs, Microservices
+Databases: PostgreSQL, MySQL, SQLite
+DevOps: Docker, CI/CD (GitHub Actions, SAP Piper), SonarQube, AWS (ECS/Lambda),
+  Git, Jira
+Testing: Cypress, Playwright, Jest
+AI: GitHub Copilot, Anthropic Claude API, prompt design, AI agent workflows
+Concepts: OOP, Clean Code, Design Patterns, Module Federation, Event-Driven & Async
+
+EDUCATION
+M.Sc. Computer Science, RPTU Kaiserslautern–Landau (Apr 2023–present)
+B.Sc. Software Engineering, COMSATS University Islamabad (2017–2021)
+
+LANGUAGES
+English (professional) · German (beginner, A1–A2 — roles that require fluent
+German are a weak fit) · Urdu (native)
+
+TARGET ROLES
+Frontend / React / TypeScript engineer, Full-stack engineer, or Software engineer
+at product-focused or enterprise teams anywhere in Germany. English-friendly /
+international teams are a strong fit.
