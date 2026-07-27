@@ -19,8 +19,8 @@ day.
 ## Why it exists
 
 Scrolling job boards every morning is repetitive and easy to skip. This turns it
-into a single Telegram message: the handful of roles genuinely worth your time,
-pre-ranked, waiting for you when you wake up.
+into a single Telegram message or email: the handful of roles genuinely worth
+your time, pre-ranked, waiting for you when you wake up.
 
 ## How it works
 
@@ -126,8 +126,9 @@ the `GMAIL_*` pair, or both.
   `umkreis` radius to scope by location, or omit for all of Germany).
 
 ### 6. Run it
-**Actions → Daily Job Agent → Run workflow.** You should get a Telegram digest
-within a minute or two. After that it runs itself every morning.
+**Actions → Daily Job Agent → Run workflow.** You should get the digest on each
+channel you configured (Telegram message and/or email) within a minute or two.
+After that it runs itself every morning.
 
 ---
 
@@ -143,6 +144,28 @@ within a minute or two. After that it runs itself every morning.
 
 Sharper (pricier) scoring: uncomment `OPENAI_MODEL: gpt-4o` in the workflow.
 Send time: the cron `0 5 * * *` is UTC — adjust the hour to taste.
+
+## Delivery channels
+
+Delivery is controlled entirely by environment variables — a channel turns on
+when its variables are present and is skipped otherwise. Configure Telegram,
+email, or both; at least one is required.
+
+| Channel      | Variables                                | Notes                                                        |
+|--------------|------------------------------------------|--------------------------------------------------------------|
+| **Telegram** | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Both required. HTML digest, chunked under Telegram's limit.   |
+| **Email**    | `GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD`    | Both required. Sent as an HTML email over Gmail SMTP (STARTTLS). |
+| **Email**    | `EMAIL_TO` *(optional)*                  | Recipient address; defaults to `GMAIL_ADDRESS` (send to self). |
+
+**Gmail specifics:** the email channel uses Gmail's SMTP server
+(`smtp.gmail.com:587`) and authenticates with a Google **App Password**, not your
+normal account password. App Passwords require 2-Step Verification to be on —
+create one at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
+No extra Python dependencies are needed (email is sent with the standard library).
+
+**When both are on,** the digest goes to both. Jobs are marked "seen" as long as
+*at least one* channel delivers successfully; if every configured channel fails,
+nothing is marked seen and the run retries on the next schedule.
 
 ## Notes & limitations
 - The Arbeitsagentur DB is huge, but some roles are posted only on company career
