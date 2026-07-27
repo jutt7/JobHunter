@@ -1,11 +1,12 @@
 """Daily job agent: fetch new German job postings, score them against your CV
-with OpenAI, and send the best ones to Telegram."""
+with OpenAI, and send the best ones to Telegram and/or email."""
 try:  # load a local .env for running on your machine (no-op in GitHub Actions)
     from dotenv import load_dotenv
     load_dotenv()
 except ImportError:
     pass
 
+import email_notify
 import notify
 import scoring
 import storage
@@ -37,6 +38,7 @@ def collect_new_jobs(seen):
 
 
 def format_message(scored):
+    """Telegram HTML digest (newline-separated, chunked by notify.send)."""
     lines = [f"<b>🌅 {len(scored)} job(s) for you today</b>", ""]
     for score, reason, job in scored:
         url = notify.esc(job_url(job))
@@ -47,6 +49,62 @@ def format_message(scored):
         lines.append(f"💡 {notify.esc(reason)}")
         lines.append("")
     return "\n".join(lines)
+
+
+def format_email(scored):
+    """Standalone HTML digest for email (block elements, not bare newlines)."""
+    blocks = []
+    for score, reason, job in scored:
+        url = notify.esc(job_url(job))
+        title = notify.esc(job.get("titel"))
+        emp = notify.esc(job.get("arbeitgeber"))
+        blocks.append(
+            '<div style="margin:0 0 18px;line-height:1.5">'
+            f'<div><b>[{score}/10]</b> <a href="{url}">{title}</a></div>'
+            f'<div>🏢 {emp}</div>'
+            f'<div>💡 {notify.esc(reason)}</div>'
+            '</div>'
+        )
+    return (
+        '<div style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif">'
+        f'<h2>🌅 {len(scored)} job(s) for you today</h2>'
+        + "".join(blocks)
+        + '</div>'
+    )
+
+
+def deliver(top):
+    """Fan the digest out to every configured channel (Telegram, email).
+
+    Returns the number of channels that succeeded. Raises if no channel is
+    configured, or if every configured channel fails — so main() won't mark the
+    jobs as seen and they'll be retried on the next run (fail-safe delivery)."""
+    channels = []
+    if notify.enabled():
+        channels.append(("Telegram", lambda: notify.send(format_message(top))))
+    if email_notify.enabled():
+        subject = f"🌅 {len(top)} job(s) for you today"
+        channels.append(("Email", lambda: email_notify.send(subject, format_email(top))))
+
+    if not channels:
+        raise RuntimeError(
+            "No delivery channel configured — set TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID "
+            "and/or GMAIL_ADDRESS/GMAIL_APP_PASSWORD."
+        )
+
+    sent, errors = 0, []
+    for name, fn in channels:
+        try:
+            fn()
+            print(f"  ✓ {name} digest sent.")
+            sent += 1
+        except Exception as e:
+            print(f"  ✗ {name} send failed: {e}")
+            errors.append(f"{name}: {e}")
+
+    if sent == 0:
+        raise RuntimeError("all delivery channels failed — " + "; ".join(errors))
+    return sent
 
 
 def main():
@@ -71,9 +129,8 @@ def main():
     print(f"{len(top)} job(s) scored >= {MIN_SCORE}")
 
     if top:
-        notify.send(format_message(top))
-        print("Digest sent.")
-        storage.save_seen(seen)
+        deliver(top)  # raises unless at least one channel succeeds
+        storage.save_seen(seen)  # only mark seen after a successful send
     else:
         storage.save_seen(seen)
         print("No jobs above threshold; nothing sent.")

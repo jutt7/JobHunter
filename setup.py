@@ -4,20 +4,24 @@
 What it automates:
   - validates your OpenAI key and Telegram bot token
   - AUTO-DETECTS your Telegram chat ID (no more copying getUpdates JSON)
-  - sends a test message so you know delivery works before the first real run
+  - optionally sets up email via Gmail (validates the app password over SMTP)
+  - sends a test message/email so you know delivery works before the first run
   - writes a local .env for running on your machine
   - optionally pushes all secrets to your GitHub repo via the `gh` CLI
 
 What it can't do (external, human-only — do these first):
-  - create the Telegram bot  -> message @BotFather, send /newbot, copy the token
-  - issue an OpenAI API key   -> https://platform.openai.com/api-keys
+  - create the Telegram bot   -> message @BotFather, send /newbot, copy the token
+  - issue an OpenAI API key    -> https://platform.openai.com/api-keys
+  - make a Gmail App Password  -> https://myaccount.google.com/apppasswords (2FA on)
 
 Run it with:  python setup.py
 """
 import os
 import shutil
+import smtplib
 import subprocess
 import time
+from email.message import EmailMessage
 
 import requests
 
@@ -82,6 +86,37 @@ def send_test(token, chat_id):
           else f"  ✗ Test send failed: {r.text}")
 
 
+def validate_gmail(address, password):
+    """Try an SMTP login so a bad app password is caught before the first run."""
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=15) as smtp:
+            smtp.starttls()
+            smtp.login(address, password)
+        print("  ✓ Gmail login works.")
+        return True
+    except Exception as e:
+        print(f"  ✗ Gmail login failed: {e}")
+        print("    Use a 16-char App Password (not your normal password), with "
+              "2-Step Verification on: https://myaccount.google.com/apppasswords")
+        return False
+
+
+def send_test_email(address, password, to):
+    msg = EmailMessage()
+    msg["Subject"] = "✅ Daily Job Agent — email setup works!"
+    msg["From"] = address
+    msg["To"] = to
+    msg.set_content("Your Daily Job Agent email channel is configured correctly.")
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=15) as smtp:
+            smtp.starttls()
+            smtp.login(address, password)
+            smtp.send_message(msg)
+        print(f"  ✓ Test email sent to {to} — check your inbox.")
+    except Exception as e:
+        print(f"  ✗ Test email failed: {e}")
+
+
 def load_existing_env():
     env = {}
     if os.path.exists(".env"):
@@ -135,10 +170,24 @@ def main():
     if chat_id:
         send_test(token, chat_id)
 
+    print("\n3) Email digest via Gmail (optional — press Enter to skip)")
+    gmail_addr = ask("   GMAIL_ADDRESS", env.get("GMAIL_ADDRESS"))
+    gmail_pw = email_to = ""
+    if gmail_addr:
+        while not validate_gmail(gmail_addr,
+                                 gmail_pw := ask("   GMAIL_APP_PASSWORD",
+                                                 env.get("GMAIL_APP_PASSWORD"))):
+            pass
+        email_to = ask("   EMAIL_TO (recipient)", env.get("EMAIL_TO") or gmail_addr)
+        send_test_email(gmail_addr, gmail_pw, email_to)
+
     values = {
         "OPENAI_API_KEY": key,
         "TELEGRAM_BOT_TOKEN": token,
         "TELEGRAM_CHAT_ID": chat_id,
+        "GMAIL_ADDRESS": gmail_addr,
+        "GMAIL_APP_PASSWORD": gmail_pw,
+        "EMAIL_TO": email_to,
     }
     print()
     write_env(values)

@@ -1,13 +1,17 @@
 """Sends the morning digest to your Telegram chat. Uses HTML formatting and
-chunks long messages under Telegram's ~4096 char limit."""
+chunks long messages under Telegram's ~4096 char limit.
+
+Enabled only when TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are set — otherwise
+the channel is skipped, so Telegram is optional alongside email."""
 import html
 import os
 
 import requests
 
-TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
-CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
-API = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+
+def enabled():
+    """True when Telegram credentials are configured."""
+    return bool(os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"))
 
 
 def esc(s):
@@ -15,11 +19,14 @@ def esc(s):
 
 
 def send(text):
+    token = os.environ["TELEGRAM_BOT_TOKEN"]
+    chat_id = os.environ["TELEGRAM_CHAT_ID"]
+    api = f"https://api.telegram.org/bot{token}/sendMessage"
     for chunk in _chunks(text, 3800):
         resp = requests.post(
-            API,
+            api,
             data={
-                "chat_id": CHAT_ID,
+                "chat_id": chat_id,
                 "text": chunk,
                 "parse_mode": "HTML",
                 "disable_web_page_preview": "true",

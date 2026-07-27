@@ -3,8 +3,12 @@
 An automated job-hunting agent for the German market. Every morning it pulls
 fresh postings from the **Arbeitsagentur** (Federal Employment Agency) public
 API, uses an **LLM to score each posting against your CV** (0–10 with a one-line
-reason), and delivers the best matches to your **Telegram** — sorted by fit,
-deduplicated, with apply links.
+reason), and delivers the best matches to **Telegram, email, or both** — sorted
+by fit, deduplicated, with apply links.
+
+Each channel is independent: configure whichever you want. If both are set the
+digest goes to both; it's marked "seen" as long as at least one delivery
+succeeds.
 
 Runs entirely on the **GitHub Actions free tier**. No server, no hosting bill —
 just a scheduled workflow. The only running cost is a few cents of LLM calls per
@@ -28,7 +32,8 @@ GitHub Actions cron (daily)
      ├─ arbeitsagentur.py   query the free jobs API        │
      ├─ storage.py          drop postings already seen     │  runs on the
      ├─ scoring.py          LLM scores fit vs. your CV      │  GH Actions
-     └─ notify.py           send a ranked Telegram digest   │  free tier
+     ├─ notify.py           send a ranked Telegram digest   │  free tier
+     └─ email_notify.py     send the same digest via email  │
                                                             ┘
 ```
 
@@ -42,13 +47,16 @@ GitHub Actions cron (daily)
   workflow), so you never get the same job twice.
 - **Fail-safe delivery.** Jobs are only marked "seen" *after* a successful send,
   so a delivery hiccup re-tries tomorrow instead of silently dropping the day.
+- **Pluggable channels.** Telegram and email are independent senders behind a
+  common `enabled()` / `send()` shape — enable either or both; adding a new
+  channel is one small module.
 - **Secrets, not files.** API keys and even your CV are injected via GitHub
   Secrets — nothing sensitive lives in the repo.
 
 ## Tech
 
 Python · GitHub Actions (cron) · OpenAI API · Telegram Bot API ·
-Arbeitsagentur Jobsuche API
+Gmail SMTP · Arbeitsagentur Jobsuche API
 
 ---
 
@@ -68,6 +76,19 @@ off by default.
 3. Visit `https://api.telegram.org/bot<TOKEN>/getUpdates` in a browser and read
    `"chat":{"id": ...}` — that number is your **chat ID**.
 
+### 2b. (Optional) Set up email via Gmail
+Prefer email, or want both? Gmail needs an **App Password**, not your normal
+password:
+1. Turn on **2-Step Verification** at
+   [myaccount.google.com/security](https://myaccount.google.com/security).
+2. Create an App Password at
+   [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) —
+   copy the 16-character code.
+3. Set `GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD`, and optionally `EMAIL_TO` (the
+   recipient; defaults to sending to yourself).
+
+The setup wizard (below) can validate this and send you a test email.
+
 ### 3. Get an OpenAI API key
 From [platform.openai.com/api-keys](https://platform.openai.com/api-keys). Make
 sure the account has billing/credits, or scoring calls fail.
@@ -86,12 +107,18 @@ python setup.py
 Or add them by hand: your fork → **Settings → Secrets and variables → Actions →
 New repository secret**:
 
-| Secret name          | Value                                             |
-|----------------------|---------------------------------------------------|
-| `OPENAI_API_KEY`     | your OpenAI API key                               |
-| `TELEGRAM_BOT_TOKEN` | the BotFather token                               |
-| `TELEGRAM_CHAT_ID`   | your numeric chat ID                              |
-| `CV_TEXT` (optional) | your full CV text — keeps it out of the repo      |
+| Secret name             | Value                                              |
+|-------------------------|----------------------------------------------------|
+| `OPENAI_API_KEY`        | your OpenAI API key                                |
+| `TELEGRAM_BOT_TOKEN`    | the BotFather token *(Telegram channel)*           |
+| `TELEGRAM_CHAT_ID`      | your numeric chat ID *(Telegram channel)*          |
+| `GMAIL_ADDRESS`         | your Gmail address *(email channel)*               |
+| `GMAIL_APP_PASSWORD`    | a 16-char Gmail **App Password** *(email channel)* |
+| `EMAIL_TO` (optional)   | recipient; defaults to `GMAIL_ADDRESS`             |
+| `CV_TEXT` (optional)    | your full CV text — keeps it out of the repo       |
+
+You need the secrets for **at least one** channel. Set the `TELEGRAM_*` pair,
+the `GMAIL_*` pair, or both.
 
 ### 5. Add your profile & searches
 - **CV:** either set the `CV_TEXT` secret (recommended), or edit `cv.txt` directly.
