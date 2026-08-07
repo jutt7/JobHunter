@@ -10,7 +10,7 @@ import email_notify
 import notify
 import scoring
 import storage
-from arbeitsagentur import job_url, search
+from arbeitsagentur import employer, job_url, ref as job_ref, search, title
 from config import (DAYS_BACK, MAX_JOBS_TO_SCORE, MIN_SCORE, SEARCH_PROFILES,
                     TOP_N)
 
@@ -31,7 +31,7 @@ def collect_new_jobs(seen):
             print(f"  search failed for {prof}: {e}")
             continue
         for j in jobs:
-            ref = j.get("refnr")
+            ref = job_ref(j)
             if ref and ref not in seen and ref not in found:
                 found[ref] = j
     return found
@@ -42,9 +42,9 @@ def format_message(scored):
     lines = [f"<b>🌅 {len(scored)} job(s) for you today</b>", ""]
     for score, reason, job in scored:
         url = notify.esc(job_url(job))
-        title = notify.esc(job.get("titel"))
-        emp = notify.esc(job.get("arbeitgeber"))
-        lines.append(f'<b>[{score}/10]</b> <a href="{url}">{title}</a>')
+        job_title = notify.esc(title(job))
+        emp = notify.esc(employer(job))
+        lines.append(f'<b>[{score}/10]</b> <a href="{url}">{job_title}</a>')
         lines.append(f"🏢 {emp}")
         lines.append(f"💡 {notify.esc(reason)}")
         lines.append("")
@@ -56,11 +56,11 @@ def format_email(scored):
     blocks = []
     for score, reason, job in scored:
         url = notify.esc(job_url(job))
-        title = notify.esc(job.get("titel"))
-        emp = notify.esc(job.get("arbeitgeber"))
+        job_title = notify.esc(title(job))
+        emp = notify.esc(employer(job))
         blocks.append(
             '<div style="margin:0 0 18px;line-height:1.5">'
-            f'<div><b>[{score}/10]</b> <a href="{url}">{title}</a></div>'
+            f'<div><b>[{score}/10]</b> <a href="{url}">{job_title}</a></div>'
             f'<div>🏢 {emp}</div>'
             f'<div>💡 {notify.esc(reason)}</div>'
             '</div>'

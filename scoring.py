@@ -6,7 +6,7 @@ import os
 
 from openai import OpenAI
 
-from arbeitsagentur import location_str
+from arbeitsagentur import employer, location_str, title
 
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
@@ -35,8 +35,8 @@ def load_cv():
 def score_job(cv, job):
     prompt = PROMPT.format(
         cv=cv,
-        title=job.get("titel", ""),
-        employer=job.get("arbeitgeber", ""),
+        title=title(job),
+        employer=employer(job),
         location=location_str(job),
     )
     try:
