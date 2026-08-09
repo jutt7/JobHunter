@@ -142,7 +142,8 @@ morning.
 | `MAX_JOBS_TO_SCORE` | Cost guard: max LLM calls per run.                  |
 | `TOP_N`             | Max jobs per digest.                                |
 
-Sharper (pricier) scoring: uncomment `OPENAI_MODEL: gpt-4o` in the workflow.
+Scoring runs on `gpt-5.6-luna`. For sharper but pricier judgement, uncomment
+`OPENAI_MODEL: gpt-5.6-terra` in the workflow.
 Send time: the cron `0 5 * * *` is UTC, so adjust the hour to taste.
 
 ## Delivery channels

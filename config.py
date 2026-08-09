@@ -6,13 +6,25 @@ de-duplicated across all profiles before scoring.
 """
 
 SEARCH_PROFILES = [
-    # No "wo" (city) => searches all of Germany. Just keyword variants that
-    # match your stack, in both English and German (postings use both).
+    # No "wo" (city) => searches all of Germany. Keyword variants that match the
+    # stack, in both English and German, since postings use both.
+
+    # Frontend
     {"was": "Frontend Developer React"},
     {"was": "React TypeScript Entwickler"},
-    {"was": "Frontend Engineer"},
+    {"was": "Frontend Entwickler React"},
+    {"was": "Frontend Engineer TypeScript"},
+    {"was": "Next.js Developer"},
+
+    # Fullstack
     {"was": "Fullstack Developer TypeScript"},
+    {"was": "Fullstack Entwickler React"},
+    {"was": "Full Stack Engineer JavaScript"},
+    {"was": "Fullstack Entwickler Java React"},
+
+    # Generic titles that often hide React/fullstack roles in the description
     {"was": "Software Engineer React"},
+    {"was": "Softwareentwickler Web"},
 ]
 
 # Wider than one day on purpose: jobs deferred by MAX_JOBS_TO_SCORE must still
