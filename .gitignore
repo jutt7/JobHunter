@@ -3,6 +3,7 @@
 # cv.txt
 
 .DS_Store
+.claude/
 __pycache__/
 *.pyc
 .venv/

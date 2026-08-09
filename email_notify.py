@@ -1,11 +1,11 @@
-"""Sends the morning digest as an HTML email via Gmail's SMTP server.
+"""Sends the digest as an HTML email through Gmail SMTP.
 
-Enabled only when GMAIL_ADDRESS and GMAIL_APP_PASSWORD are set — otherwise the
-channel is skipped, so email is entirely optional alongside Telegram.
+Active only when GMAIL_ADDRESS and GMAIL_APP_PASSWORD are set, otherwise the
+channel is skipped.
 
-Use a Google **App Password**, not your normal account password: turn on 2-Step
-Verification, then create one at https://myaccount.google.com/apppasswords.
-EMAIL_TO is optional and defaults to sending the digest to yourself.
+GMAIL_APP_PASSWORD must be a Google App Password, not the account password:
+turn on 2-Step Verification, then create one at
+https://myaccount.google.com/apppasswords. EMAIL_TO defaults to GMAIL_ADDRESS.
 """
 import os
 import smtplib
@@ -30,8 +30,8 @@ def send(subject, html_body):
     msg["From"] = address
     msg["To"] = to
     # Plain-text fallback for clients that won't render HTML.
-    msg.set_content("Your daily job digest is formatted in HTML — "
-                    "enable HTML viewing to see it.")
+    msg.set_content("Your daily job digest is formatted in HTML. "
+                    "Enable HTML viewing to see it.")
     msg.add_alternative(html_body, subtype="html")
 
     with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as smtp:

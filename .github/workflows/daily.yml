@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # full history, so the rebase below has a merge base
 
       - uses: actions/setup-python@v5
         with:
@@ -26,9 +28,12 @@ jobs:
       - name: Run agent
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # CV injected at runtime so it never gets committed. Without it the
+          # run fails fast instead of scoring against the cv.txt placeholder.
+          CV_TEXT: ${{ secrets.CV_TEXT }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          # Optional email channel — leave these secrets unset to skip email.
+          # Optional email channel. Leave these secrets unset to skip email.
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
@@ -39,5 +44,21 @@ jobs:
           git config user.name "job-agent"
           git config user.email "actions@users.noreply.github.com"
           git add seen.json
-          git diff --staged --quiet || git commit -m "update seen jobs [skip ci]"
-          git push
+          if git diff --staged --quiet; then
+            echo "seen.json unchanged, nothing to persist."
+            exit 0
+          fi
+          git commit -m "update seen jobs [skip ci]"
+          # main can move under us (you push while a run is in flight, or this
+          # is a re-run replaying an older SHA), so rebase onto the remote tip
+          # and retry instead of failing the whole run on a rejected push.
+          for attempt in 1 2 3; do
+            if git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"; then
+              echo "seen.json persisted on attempt ${attempt}."
+              exit 0
+            fi
+            echo "push attempt ${attempt} failed; retrying in 5s..."
+            sleep 5
+          done
+          echo "could not persist seen.json after 3 attempts" >&2
+          exit 1

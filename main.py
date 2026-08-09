@@ -1,10 +1,12 @@
-"""Daily job agent: fetch new German job postings, score them against your CV
-with OpenAI, and send the best ones to Telegram and/or email."""
+"""Daily job agent: fetch new German job postings, score them against your CV,
+send the best ones to Telegram and/or email."""
 try:  # load a local .env for running on your machine (no-op in GitHub Actions)
     from dotenv import load_dotenv
     load_dotenv()
 except ImportError:
     pass
+
+from itertools import zip_longest
 
 import email_notify
 import notify
@@ -16,8 +18,13 @@ from config import (DAYS_BACK, MAX_JOBS_TO_SCORE, MIN_SCORE, SEARCH_PROFILES,
 
 
 def collect_new_jobs(seen):
-    """Run every search profile, merge results, drop anything already seen."""
-    found = {}
+    """Run every search profile, merge results, drop anything already seen.
+
+    Results are interleaved round-robin rather than concatenated. The scoring
+    budget cuts off the tail of this dict, so concatenating would always defer
+    the last profiles in SEARCH_PROFILES; interleaving spreads the cut evenly.
+    """
+    per_profile = []
     for prof in SEARCH_PROFILES:
         try:
             jobs = search(
@@ -30,7 +37,13 @@ def collect_new_jobs(seen):
         except Exception as e:
             print(f"  search failed for {prof}: {e}")
             continue
-        for j in jobs:
+        per_profile.append(jobs)
+
+    found = {}
+    for row in zip_longest(*per_profile):
+        for j in row:
+            if j is None:
+                continue
             ref = job_ref(j)
             if ref and ref not in seen and ref not in found:
                 found[ref] = j
@@ -74,11 +87,11 @@ def format_email(scored):
 
 
 def deliver(top):
-    """Fan the digest out to every configured channel (Telegram, email).
+    """Send the digest to every configured channel.
 
     Returns the number of channels that succeeded. Raises if no channel is
-    configured, or if every configured channel fails — so main() won't mark the
-    jobs as seen and they'll be retried on the next run (fail-safe delivery)."""
+    configured or if all of them fail, so main() leaves the jobs unseen and they
+    get retried on the next run."""
     channels = []
     if notify.enabled():
         channels.append(("Telegram", lambda: notify.send(format_message(top))))
@@ -88,7 +101,7 @@ def deliver(top):
 
     if not channels:
         raise RuntimeError(
-            "No delivery channel configured — set TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID "
+            "No delivery channel configured. Set TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID "
             "and/or GMAIL_ADDRESS/GMAIL_APP_PASSWORD."
         )
 
@@ -103,7 +116,7 @@ def deliver(top):
             errors.append(f"{name}: {e}")
 
     if sent == 0:
-        raise RuntimeError("all delivery channels failed — " + "; ".join(errors))
+        raise RuntimeError("all delivery channels failed: " + "; ".join(errors))
     return sent
 
 
@@ -118,11 +131,17 @@ def main():
 
     cv = scoring.load_cv()
     scored = []
-    for i, (ref, job) in enumerate(new_jobs.items()):
-        if i < MAX_JOBS_TO_SCORE:
-            s, reason = scoring.score_job(cv, job)
-            scored.append((s, reason, job))
-        seen.add(ref)  # mark seen regardless, so it won't recur tomorrow
+    # Only scored jobs get marked seen. Anything past the budget stays unseen so
+    # the next run picks it up (see DAYS_BACK in config.py).
+    batch = list(new_jobs.items())[:MAX_JOBS_TO_SCORE]
+    skipped = len(new_jobs) - len(batch)
+    if skipped:
+        print(f"  scoring budget reached, {skipped} job(s) deferred to the next run")
+
+    for ref, job in batch:
+        s, reason = scoring.score_job(cv, job)
+        scored.append((s, reason, job))
+        seen.add(ref)
 
     scored.sort(key=lambda x: x[0], reverse=True)
     top = [t for t in scored if t[0] >= MIN_SCORE][:TOP_N]

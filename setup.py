@@ -9,7 +9,7 @@ What it automates:
   - writes a local .env for running on your machine
   - optionally pushes all secrets to your GitHub repo via the `gh` CLI
 
-What it can't do (external, human-only — do these first):
+What it can't do (external, human-only; do these first):
   - create the Telegram bot   -> message @BotFather, send /newbot, copy the token
   - issue an OpenAI API key    -> https://platform.openai.com/api-keys
   - make a Gmail App Password  -> https://myaccount.google.com/apppasswords (2FA on)
@@ -70,7 +70,7 @@ def resolve_chat_id(token):
             chat_id = str(results[-1]["message"]["chat"]["id"])
             print(f"  ✓ Detected chat ID: {chat_id}")
             return chat_id
-        print("  …no message seen yet — send your bot a message; retrying in 3s.")
+        print("  no message seen yet. Send your bot a message; retrying in 3s.")
         time.sleep(3)
     print("  ✗ Couldn't detect a message. Make sure you messaged the bot, then rerun.")
     return ""
@@ -79,10 +79,10 @@ def resolve_chat_id(token):
 def send_test(token, chat_id):
     r = requests.post(
         f"https://api.telegram.org/bot{token}/sendMessage",
-        data={"chat_id": chat_id, "text": "✅ Daily Job Agent — setup works!"},
+        data={"chat_id": chat_id, "text": "Daily Job Agent: setup works!"},
         timeout=15,
     )
-    print("  ✓ Test message sent — check Telegram." if r.ok
+    print("  ✓ Test message sent. Check Telegram." if r.ok
           else f"  ✗ Test send failed: {r.text}")
 
 
@@ -103,7 +103,7 @@ def validate_gmail(address, password):
 
 def send_test_email(address, password, to):
     msg = EmailMessage()
-    msg["Subject"] = "✅ Daily Job Agent — email setup works!"
+    msg["Subject"] = "Daily Job Agent: email setup works!"
     msg["From"] = address
     msg["To"] = to
     msg.set_content("Your Daily Job Agent email channel is configured correctly.")
@@ -112,7 +112,7 @@ def send_test_email(address, password, to):
             smtp.starttls()
             smtp.login(address, password)
             smtp.send_message(msg)
-        print(f"  ✓ Test email sent to {to} — check your inbox.")
+        print(f"  ✓ Test email sent to {to}. Check your inbox.")
     except Exception as e:
         print(f"  ✗ Test email failed: {e}")
 
@@ -132,12 +132,12 @@ def write_env(values):
         for k, v in values.items():
             if v:
                 f.write(f"{k}={v}\n")
-    print("  ✓ Wrote .env (git-ignored — stays on your machine).")
+    print("  ✓ Wrote .env (git-ignored, stays on your machine).")
 
 
 def push_gh_secrets(values):
     if not shutil.which("gh"):
-        print("\nℹ `gh` CLI not installed — skipping GitHub secrets. Add them "
+        print("\n`gh` CLI not installed, skipping GitHub secrets. Add them "
               "manually under Settings → Secrets and variables → Actions, or "
               "install gh (https://cli.github.com) and rerun.")
         return
@@ -155,7 +155,7 @@ def push_gh_secrets(values):
 
 
 def main():
-    print("=== Daily Job Agent — setup wizard ===\n")
+    print("=== Daily Job Agent setup wizard ===\n")
     env = load_existing_env()
 
     print("1) OpenAI API key  (https://platform.openai.com/api-keys)")
@@ -170,7 +170,7 @@ def main():
     if chat_id:
         send_test(token, chat_id)
 
-    print("\n3) Email digest via Gmail (optional — press Enter to skip)")
+    print("\n3) Email digest via Gmail (optional, press Enter to skip)")
     gmail_addr = ask("   GMAIL_ADDRESS", env.get("GMAIL_ADDRESS"))
     gmail_pw = email_to = ""
     if gmail_addr:

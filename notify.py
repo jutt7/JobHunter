@@ -1,8 +1,8 @@
-"""Sends the morning digest to your Telegram chat. Uses HTML formatting and
-chunks long messages under Telegram's ~4096 char limit.
+"""Sends the digest to a Telegram chat, HTML formatted and chunked under
+Telegram's ~4096 char limit.
 
-Enabled only when TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are set — otherwise
-the channel is skipped, so Telegram is optional alongside email."""
+Active only when TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are set, otherwise the
+channel is skipped."""
 import html
 import os
 

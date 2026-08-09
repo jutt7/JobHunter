@@ -1,8 +1,8 @@
-# TEMPLATE — replace with your own profile.
+# TEMPLATE: replace with your own profile.
 # Two ways to provide your CV:
 #   1. Edit this file directly (your CV will live in the repo), OR
 #   2. (recommended for a public repo) leave this template as-is and add a
-#      CV_TEXT repository secret with your full CV — the workflow injects it at
+#      CV_TEXT repository secret with your full CV. The workflow injects it at
 #      runtime so your CV never gets committed.
 # The more concrete the tech stack, seniority, location and language notes,
 # the sharper the fit scores.
@@ -12,7 +12,7 @@ Java / Spring Boot on the backend. Open to relocating anywhere in Germany.
 Availability: full-time.
 
 EXPERIENCE
-- Company (Country) — Role, dates
+- Company (Country), Role, dates
   Key stack and what you built.
 
 PROJECTS
@@ -28,7 +28,7 @@ EDUCATION
 - Degree, University, dates
 
 LANGUAGES
-English (professional) · German (beginner — roles requiring fluent German are a
+English (professional) · German (beginner; roles requiring fluent German are a
 weak fit) · other languages
 
 TARGET ROLES
