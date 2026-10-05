@@ -142,9 +142,12 @@ def _clean(raw):
     return text[:_MAX_DESC_CHARS]
 
 
-def detail(job):
-    """Raw detail payload for a job. Returns {} on any failure."""
-    ref_nr = ref(job)
+def detail_by_ref(ref_nr):
+    """Raw detail payload for a reference number. Returns {} on any failure.
+
+    Split out from detail() so callers holding a normalised Posting (which keeps
+    the refnr as source_id, not the whole v6 dict) can fetch an advert body.
+    """
     if not ref_nr:
         return {}
     encoded = base64.b64encode(ref_nr.encode("utf-8")).decode("ascii")
@@ -159,9 +162,14 @@ def detail(job):
         return {}
 
 
-def description(job):
-    """Advert text as plain text, or "" if unavailable."""
-    data = detail(job)
+def detail(job):
+    """Raw detail payload for a job dict. Returns {} on any failure."""
+    return detail_by_ref(ref(job))
+
+
+def description_by_ref(ref_nr):
+    """Advert text for a reference number, or "" if unavailable."""
+    data = detail_by_ref(ref_nr)
     if not data:
         return ""
     for field in _DESC_FIELDS:
@@ -169,3 +177,8 @@ def description(job):
         if cleaned:
             return cleaned
     return ""
+
+
+def description(job):
+    """Advert text for a job dict, or "" if unavailable."""
+    return description_by_ref(ref(job))

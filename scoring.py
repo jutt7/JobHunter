@@ -11,10 +11,25 @@ import os
 
 from openai import OpenAI
 
-from arbeitsagentur import description, employer, location_str, title
+from sources import Posting
 
-client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 MODEL = os.environ.get("OPENAI_MODEL", "gpt-5.6-luna")
+
+_client = None
+
+
+def _get_client():
+    """Built on first use, not at import.
+
+    Importing this module used to require OPENAI_API_KEY, which meant a dry run
+    or a test that never scores anything still needed a key. score_job() calls
+    this outside its try/except, so a missing key is still a loud failure rather
+    than silently turning every job into a 0.
+    """
+    global _client
+    if _client is None:
+        _client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+    return _client
 
 # Advert text sent to the model. 4k chars is roughly 1k tokens, enough for
 # requirements and stack while keeping per-job cost predictable.
@@ -85,13 +100,22 @@ def _token_limit_kwarg(model):
     return {"max_completion_tokens": 2000}
 
 
-def score_job(cv, job):
-    desc = description(job)  # "" when the detail fetch fails
+def score_job(cv, posting: Posting):
+    """Score one posting. Pure: everything it needs is already on the Posting.
+
+    The advert body used to be fetched here, which meant scoring quietly made an
+    HTTP request per job and only the Arbeitsagentur could ever be scored. The
+    pipeline now fills `description` (via the source's describe()) for exactly
+    the postings that reach this function, so no fetch happens for a posting
+    that dedupe, the title filter or the budget was going to discard anyway.
+    """
+    client = _get_client()  # outside the try: a missing key must not become a 0
+    desc = posting.description  # "" when the source couldn't get the text
     prompt = PROMPT.format(
         cv=cv,
-        title=title(job),
-        employer=employer(job),
-        location=location_str(job),
+        title=posting.title,
+        employer=posting.company,
+        location=posting.location,
         description=desc[:MAX_DESC_CHARS] if desc else "(not available)",
     )
     try:
